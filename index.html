@@ -15,40 +15,49 @@
   <body ng-app="app">
 <div ng-controller="AppController" class="container">
   <h1>Projected Cash Value Calculator {{2+1}}</h1>
-  <canvas id="line" class="chart chart-line" chart-data="data"
-chart-labels="labels" chart-series="series" chart-options="options"
-chart-dataset-override="datasetOverride" chart-click="onClick">
-</canvas>
 
+
+
+<canvas id="base" class="chart-bar"
+  chart-data="data" chart-labels="labels" chart-colors="colors"
+  chart-dataset-override="datasetOverride" >
+</canvas>
 
 <h2>Basic Numeric Data</h2>
 
 
 <div class="row">
-  <div ng-hide="pvToFv" class="input-group col-md-3 col-sm-3 col-xs-6">
+  <div ng-hide="pvToFv" class="input-group col-md-3 col-sm-4 col-xs-6">
    <div class="input-group-addon">FV</div>
    <input type="text" class="form-control" placeholder="0" ng-model="fv"></input>
     <span ng-hide="numberValidation(fv)"><div class="text-danger">*</div></span>
  </div>
- <div ng-show="pvToFv" class="input-group col-md-3 col-sm-3 col-xs-6">
+ <div ng-show="pvToFv" class="input-group col-md-3 col-sm-4 col-xs-6">
   <div class="input-group-addon">PV</div>
   <input type="text" class="form-control" placeholder="0" ng-model="pv"></input>
    <span ng-hide="numberValidation(pv)"><div class="text-danger">*</div></span>
 </div>
 
-<div class="input-group col-md-3 col-sm-6 col-xs-6">
+<div class="input-group col-md-4 col-sm-6 col-xs-6">
  <div class="input-group-addon">{{typeOfPeriod}} Payment</div>
  <input type="text" class="form-control" placeholder="0" ng-model="payment"></input>
   <span ng-hide="numberValidation(payment)"><div class="text-danger">*</div></span>
 </div>
 
 
-<div class="input-group col-md-3 col-sm-6 col-xs-6">
+<div class="input-group col-md-8 col-sm-12 col-xs-6">
  <div class="input-group-addon">{{typeOfPeriod}} Compounded Rate(%) </div>
  <input type="text" class="form-control" placeholder="0"  ng-model="growthrate"></input>
+ <select ng-model="growthRateVariation" class="custom-select mb-2 mr-sm-2 mb-sm-0" id="inlineFormCustomSelect">
+
+   <option selected value="">Single</option>
+   <option value="pointFive">+/- 0.5</option>
+   <option value="onePoint">+/- 1</option>
+   <option value="onePointFive">+/- 1.5</option>
+ </select>
    <span ng-hide="numberValidation(growthrate)"><div class="text-danger">*</div></span>
 </div>
-<div class="input-group col-md-5 col-sm-6 col-xs-6">
+<div class="input-group col-md-6 col-sm-6 col-xs-6">
  <div class="input-group-addon">Time Period</div>
  <select ng-model="typeOfPeriod" class="custom-select mb-2 mr-sm-2 mb-sm-0" id="inlineFormCustomSelect">
    <option selected value="">Choose...</option>
@@ -60,65 +69,54 @@ chart-dataset-override="datasetOverride" chart-click="onClick">
 </div>
 
 
-<div class="input-group col-md-3 col-sm-6 col-xs-6">
- <div class="input-group-addon">Num Periods ({{typeOfPeriod}})</div>
+<div class="input-group col-md-6 col-sm-6 col-xs-6">
+ <div class="input-group-addon">Num Periods Annual</div>
  <input type="text" class="form-control" placeholder="0" ng-model="numPeriods"></input>
 <span ng-hide="numberValidation(numPeriods)"><div class="text-danger">*</div></span>
 </div>
-{{cl(numPeriods)}}
-
-
-<!-- <div class="input-group col-md-3 col-sm-3 col-xs-6">
- <div class="input-group-addon">{{typeOfPeriod}} Rate (Low)</div>
- <input type="text" class="form-control" placeholder="0" ng-model="rateConservative"></input>
-</div>
-<div class="input-group col-md-3 col-sm-3 col-xs-6">
- <div class="input-group-addon">{{typeOfPeriod}} Rate (Med)</div>
- <input type="text" class="form-control" placeholder="0" ng-model="rateModerate"></input>
-</div>
-<div class="input-group col-md-3 col-sm-3 col-xs-6">
- <div class="input-group-addon">{{typeOfPeriod}} Rate (High)</div>
- <input type="text" class="form-control" placeholder="0" ng-model="rateOptimistic"></input>
 </div>
 
-<hr />
-<br>
-</div>
-<span ng-hide="numberValidation(fv)">
-  <div class="alert alert-danger" role="alert">
-  There is an error with the value of fv. Check to make sure that it is a non-zero number.
-  </div>
+<span ng-show="pvToFv">
+  <button type="button" ng-hide="validationCalculation(fv, pv, payment, growthrate, numPeriods, typeOfPeriod, pvToFv)" class="btn btn-success float-right disabled">Calculate PV to FV</button>
+<button type="button"  ng-show="validationCalculation(fv, pv, payment, growthrate, numPeriods, typeOfPeriod, pvToFv)" ng-click="calculateFVfromPV(pv, payment, growthrate, numPeriods, typeOfPeriod)" class="btn btn-success float-right">Calculate PV to FV</button>
 </span>
 
-<span ng-hide="numberValidation(pv)">
-  <div class="alert alert-danger" role="alert">
-  There is an error with the value of pv. Check to make sure that it is a non-zero number.
-  </div>
+<span ng-hide="pvToFv">
+<button type="button" ng-hide="validationCalculation(fv, pv, payment, growthrate, numPeriods, typeOfPeriod, pvToFv)" class="btn btn-success float-right disabled">Calculate FV to PV</button>
+<button type="button" ng-show="validationCalculation(fv, pv, payment, growthrate, numPeriods, typeOfPeriod, pvToFv)" ng-click="calculatePVfromFV(fv, payment, growthrate, numPeriods, typeOfPeriod)" class="btn btn-success float-right">Calculate FV to PV</button>
 </span>
-
-<span ng-hide="numberValidation(payment)">
-    <div class="alert alert-danger" role="alert">
-  There is an error with the value of payment. Check to make sure that it is a non-zero number.
-    </div>
-</span>
-
-<span ng-hide="numberValidation(growthrate)">
-    <div class="alert alert-danger" role="alert">
-  There is an error with the value of growthrate. Check to make sure that it is a non-zero number.
-    </div>
-</span>
-
- -->
-</div>
-{{data | json }}
-{{labels | json }}
-
-<button type="button" ng-show="pvToFv" ng-click="calculateFVfromPV(pv, payment, growthrate, numPeriods, typeOfPeriod)" class="btn btn-success float-right">Calculate PV to FV</button>
-<button type="button" ng-hide="pvToFv"  class="btn btn-success float-right">Calculate FV to PV</button>
-
 <button type="button" ng-show="pvToFv" ng-click="togglePvToFv()" class="btn btn-primary">Change to "FV to PV" mode</button>
 
 <button type="button" ng-hide="pvToFv" ng-click="togglePvToFv()" class="btn btn-warning">Change to "PV to FV" mode</button>
+<hr>
+<h3>Dividend Calculation</h3>
+<div class="input-group col-md-6 col-sm-6 col-xs-6">
+ <div class="input-group-addon">Dividend Rate (%)</div>
+ <input type="text" class="form-control" placeholder="0" ng-model="dividend.rate"></input>
+<span ng-hide="numberValidation(dividend.rate)"><div class="text-danger">*</div></span>
+</div>
+<div class="input-group col-md-6 col-sm-6 col-xs-6">
+ <div class="input-group-addon">First Year of Payout</div>
+ <input type="text" class="form-control" placeholder="0" ng-model="dividend.start"></input>
+<span ng-hide="validationPayoutPeriod(dividend.start, numPeriods)"><div class="text-danger">*</div></span>
 
+</div>
+<div class="input-group col-md-6 col-sm-6 col-xs-6">
+  <select ng-model="dividend.payoutMode" class="custom-select mb-2 mr-sm-2 mb-sm-0" id="inlineFormCustomSelect">
+    <option selected value="">Select Payout Mode</option>
+    <option value="reinvest">Reinvested</option>
+    <option value="payout">Yearly Payout</option>
+
+  </select>
+<span ng-hide="validationTypePeriod(dividend.payoutMode)"><div class="text-danger">*</div></span>
+</div>
+<button type="button" ng-hide="validationDividend(dividend.rate, dividend.start, dividend.payoutMode)" class="btn btn-success float-right disabled">Calculate FV to PV</button>
+<button type="button" ng-show="validationDividend(dividend.rate, dividend.start, dividend.payoutMode)" ng-click="calculateDividends(dividend.rate, dividend.start, dividend.payoutMode)" class="btn btn-success float-right">Calculate Dividends</button>
+<br>
+<br>
+<hr>
+{{data | json }}
+{{labels | json }}
+{{cashValue | json }}
   </body>
 </html>
